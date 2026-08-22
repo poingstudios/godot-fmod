@@ -11,9 +11,15 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import warnings
+
+warnings.filterwarnings("ignore")
+
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
 
 # 1. Secure Credential Retrieval
 user = os.environ.get("FMOD_USER") or os.environ.get("FMOD_USERNAME") or os.environ.get("FMODUSER")
@@ -44,13 +50,47 @@ bin_dest = os.path.abspath("platforms/godot_editor/addons/fmod/bin")
 os.makedirs(f"{sdk_dest}/api", exist_ok=True)
 os.makedirs(bin_dest, exist_ok=True)
 
-# 2. Authenticate with FMOD API (using pure standard library urllib)
+
+def download_with_retry(download_url: str, output_file: str, max_retries: int = 5) -> None:
+    """Downloads a file with automatic resume and retry on socket resets."""
+    for attempt in range(1, max_retries + 1):
+        try:
+            req_headers = {
+                "User-Agent": USER_AGENT,
+                "Accept": "*/*",
+                "Connection": "keep-alive",
+            }
+            existing_size = os.path.getsize(output_file) if os.path.exists(output_file) else 0
+            if existing_size > 0:
+                req_headers["Range"] = f"bytes={existing_size}-"
+
+            req = urllib.request.Request(download_url, headers=req_headers)
+            with urllib.request.urlopen(req, timeout=45) as resp:
+                is_partial = getattr(resp, "status", None) == 206 or getattr(resp, "code", None) == 206
+                open_mode = "ab" if is_partial and existing_size > 0 else "wb"
+
+                with open(output_file, open_mode) as f:
+                    while True:
+                        chunk = resp.read(65536)
+                        if not chunk:
+                            break
+                        f.write(chunk)
+            return
+        except Exception as err:
+            if attempt == max_retries:
+                raise RuntimeError(f"Download failed after {max_retries} attempts: {err}") from err
+            wait_time = attempt * 2
+            print(f"    Notice: Connection reset. Resuming download in {wait_time}s (attempt {attempt}/{max_retries})...")
+            time.sleep(wait_time)
+
+
+# 2. Authenticate with FMOD API
 print(">>> Authenticating with fmod.com...")
 auth_header = "Basic " + base64.b64encode(f"{user}:{password}".encode("utf-8")).decode("ascii")
 auth_req = urllib.request.Request(
     "https://www.fmod.com/api-login",
     data=b"",
-    headers={"Authorization": auth_header, "User-Agent": "GodotFmodProvisioner/1.0"},
+    headers={"Authorization": auth_header, "User-Agent": USER_AGENT},
     method="POST",
 )
 
@@ -69,7 +109,7 @@ if not token:
 query = urllib.parse.urlencode({"path": api_path, "filename": filename, "user": user})
 dl_req = urllib.request.Request(
     f"https://www.fmod.com/api-get-download-link?{query}",
-    headers={"Authorization": f"Bearer {token}", "User-Agent": "GodotFmodProvisioner/1.0"},
+    headers={"Authorization": f"Bearer {token}", "User-Agent": USER_AGENT},
     method="GET",
 )
 
@@ -88,17 +128,7 @@ if not download_url:
 with tempfile.TemporaryDirectory(prefix="fmod_provision_") as temp_dir:
     download_target = os.path.join(temp_dir, filename)
     print(f">>> Downloading {platform} SDK package...")
-    try:
-        file_req = urllib.request.Request(download_url, headers={"User-Agent": "GodotFmodProvisioner/1.0"})
-        with urllib.request.urlopen(file_req, timeout=120) as stream, open(download_target, "wb") as f:
-            while True:
-                chunk = stream.read(65536)
-                if not chunk:
-                    break
-                f.write(chunk)
-    except Exception as e:
-        print(f"Error: Download interrupted: {e}")
-        sys.exit(1)
+    download_with_retry(download_url, download_target)
 
     print(f">>> Extracting {platform} FMOD SDK...")
     extract_dir = os.path.join(temp_dir, "extracted")
@@ -127,7 +157,7 @@ with tempfile.TemporaryDirectory(prefix="fmod_provision_") as temp_dir:
                     member_path = os.path.join(path, member.name)
                     if not is_within_directory(path, member_path):
                         raise RuntimeError(f"Attempted Path Traversal: {member.name}")
-                tar_obj.extractall(path)
+                    tar_obj.extractall(path)
 
             safe_extract(tar, extract_dir)
 
@@ -136,7 +166,8 @@ with tempfile.TemporaryDirectory(prefix="fmod_provision_") as temp_dir:
             break
 
     elif platform == "windows":
-        subprocess.run(["7z", "x", download_target, f"-o{extract_dir}", "-y"], check=True)
+        seven_zip = shutil.which("7z") or r"C:\Program Files\7-Zip\7z.exe"
+        subprocess.run([seven_zip, "x", download_target, f"-o{extract_dir}", "-y"], check=True)
         for path in glob.glob(f"{extract_dir}/**/api", recursive=True):
             shutil.copytree(path, f"{sdk_dest}/api", dirs_exist_ok=True)
             break
