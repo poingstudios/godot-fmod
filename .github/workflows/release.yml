@@ -21,7 +21,7 @@ jobs:
     outputs:
       version: ${{ steps.setup.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup and Validation
         id: setup
@@ -101,7 +101,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -154,7 +154,7 @@ jobs:
         shell: bash
 
       - name: Upload Binary Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: binary-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}
           path: platforms/godot_editor/addons/fmod/bin/*
@@ -165,7 +165,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Prepare Plugin Directory
         run: |
@@ -173,7 +173,7 @@ jobs:
           touch platforms/godot_editor/addons/fmod/bin/.gdignore
 
       - name: Download All Binaries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           pattern: binary-*
           merge-multiple: true
@@ -188,7 +188,7 @@ jobs:
         run: ./.github/scripts/compress_editor_plugin.sh
 
       - name: Upload Release Archive Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.ZIP_NAME }}
           path: platforms/godot_editor/${{ env.ZIP_NAME }}
