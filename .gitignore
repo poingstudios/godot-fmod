@@ -1,0 +1,67 @@
+# Godot 4+ specific ignores
+.godot/
+.import/
+*.uid
+export.cfg
+export_presets.cfg
+export_credentials.cfg
+
+# OS-specific ignores
+.DS_Store
+.DS_STORE
+Thumbs.db
+
+# Editor and IDE ignores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.iml
+
+# SCons / C++ compilation artifacts
+platforms/gdextension/.sconsign.dblite
+platforms/gdextension/godot-cpp/bin/
+platforms/gdextension/godot-cpp/gen/
+*.o
+*.os
+*.obj
+*.a
+*.lib
+*.exp
+*.pdb
+
+# Compiled GDExtension binaries & proprietary libraries
+platforms/godot_editor/addons/godot_fmod/bin/*
+!platforms/godot_editor/addons/godot_fmod/bin/.gdignore
+platforms/gdextension/thirdparty/fmod/api/
+*.dylib
+*.so
+*.dll
+
+# FMOD Audio Banks (Proprietary Sample Media)
+*.bank
+platforms/godot_editor/banks/
+
+# Build and Backup ignores
+*.old
+*.bak
+*.tmp
+*.log
+__pycache__/
+.cache/
+.venv/
+
+# Mono-specific ignores
+.mono/
+mono_crash*.json
+data_*/
+
+# Temporary
+tmp/
+
+# Antigravity CLI & Intellisense
+.antigravitycli/
+compile_commands.json
+platforms/gdextension/compile_commands.json
+platforms/godot_editor/addons/godot_fmod/csharp/.gdignore

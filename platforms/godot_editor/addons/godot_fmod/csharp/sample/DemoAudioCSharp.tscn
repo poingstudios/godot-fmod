@@ -1,0 +1,217 @@
+[gd_scene format=3 uid="uid://dm0audio_csharp_sample"]
+
+[ext_resource type="Script" path="res://addons/godot_fmod/csharp/sample/DemoAudioCSharp.cs" id="1_csharp_script"]
+[ext_resource type="Texture2D" uid="uid://dr0gmsiavr3pp" path="res://icon.svg" id="2_icon"]
+
+[node name="DemoAudioCSharp" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("1_csharp_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.07, 0.08, 0.11, 1)
+
+[node name="GridCrosshair" type="Line2D" parent="."]
+points = PackedVector2Array(576, 0, 576, 648, 576, 324, 0, 324, 1152, 324)
+width = 1.0
+default_color = Color(1, 1, 1, 0.08)
+
+[node name="Listener" type="FmodListener2D" parent="."]
+position = Vector2(576, 324)
+
+[node name="ListenerIcon" type="Sprite2D" parent="Listener"]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_icon")
+
+[node name="ListenerLabel" type="Label" parent="Listener"]
+offset_left = -100.0
+offset_top = 34.0
+offset_right = 100.0
+offset_bottom = 57.0
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+text = "🎧 Listener (Center)"
+horizontal_alignment = 1
+
+[node name="SpatialEmitter" type="FmodEventEmitter2D" parent="."]
+position = Vector2(200, 520)
+event_name = "event:/Vehicles/Car Engine"
+volume = 0.8
+
+[node name="Icon" type="Sprite2D" parent="SpatialEmitter"]
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("2_icon")
+
+[node name="Label" type="Label" parent="SpatialEmitter"]
+offset_left = -60.0
+offset_top = 26.0
+offset_right = 60.0
+offset_bottom = 49.0
+text = "🚗 Car Engine"
+horizontal_alignment = 1
+
+[node name="TopPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 15.0
+offset_right = -20.0
+offset_bottom = 195.0
+grow_horizontal = 2
+
+[node name="Margin" type="MarginContainer" parent="TopPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="TopPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="TopPanel/Margin/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Godot FMOD — [C# .NET] Interactive Audio Testbed"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="TopPanel/Margin/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 0.5, 1)
+text = "[C#] Click anywhere on the full screen to fire spatial gunshots!"
+horizontal_alignment = 1
+
+[node name="HBoxControls" type="HBoxContainer" parent="TopPanel/Margin/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="BtnSFX" type="Button" parent="TopPanel/Margin/VBoxContainer/HBoxControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "💥 One-Shot Explosion"
+
+[node name="BtnStartMusic" type="Button" parent="TopPanel/Margin/VBoxContainer/HBoxControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "▶ Start Music"
+
+[node name="BtnPauseMusic" type="Button" parent="TopPanel/Margin/VBoxContainer/HBoxControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "⏸ Pause / Resume"
+
+[node name="BtnStopMusic" type="Button" parent="TopPanel/Margin/VBoxContainer/HBoxControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "⏹ Stop Music"
+
+[node name="BtnToggleEmitter" type="Button" parent="TopPanel/Margin/VBoxContainer/HBoxControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🚗 Toggle Car Emitter"
+
+[node name="HBoxSliders" type="HBoxContainer" parent="TopPanel/Margin/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="HBoxParam" type="HBoxContainer" parent="TopPanel/Margin/VBoxContainer/HBoxSliders"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="TopPanel/Margin/VBoxContainer/HBoxSliders/HBoxParam"]
+layout_mode = 2
+text = "Progression:"
+
+[node name="ParamSlider" type="HSlider" parent="TopPanel/Margin/VBoxContainer/HBoxSliders/HBoxParam"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+
+[node name="ParamValue" type="Label" parent="TopPanel/Margin/VBoxContainer/HBoxSliders/HBoxParam"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "0.0"
+
+[node name="HBoxRPM" type="HBoxContainer" parent="TopPanel/Margin/VBoxContainer/HBoxSliders"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="TopPanel/Margin/VBoxContainer/HBoxSliders/HBoxRPM"]
+layout_mode = 2
+text = "RPM:"
+
+[node name="RPMSlider" type="HSlider" parent="TopPanel/Margin/VBoxContainer/HBoxSliders/HBoxRPM"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 4000.0
+step = 25.0
+value = 2000.0
+
+[node name="RPMValue" type="Label" parent="TopPanel/Margin/VBoxContainer/HBoxSliders/HBoxRPM"]
+custom_minimum_size = Vector2(38, 0)
+layout_mode = 2
+text = "2000"
+
+[node name="HBoxVolume" type="HBoxContainer" parent="TopPanel/Margin/VBoxContainer/HBoxSliders"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="TopPanel/Margin/VBoxContainer/HBoxSliders/HBoxVolume"]
+layout_mode = 2
+text = "Master Vol:"
+
+[node name="VolumeSlider" type="HSlider" parent="TopPanel/Margin/VBoxContainer/HBoxSliders/HBoxVolume"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="VolumeValue" type="Label" parent="TopPanel/Margin/VBoxContainer/HBoxSliders/HBoxVolume"]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+text = "1.0"
+
+[node name="HintLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+offset_bottom = -15.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.6, 0.65, 0.75, 0.8)
+text = "🎯 Left-Click anywhere across the screen to fire spatial pistol shots"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="TopPanel/Margin/VBoxContainer/HBoxControls/BtnSFX" to="." method="OnPlaySfxPressed"]
+[connection signal="pressed" from="TopPanel/Margin/VBoxContainer/HBoxControls/BtnStartMusic" to="." method="OnStartMusicPressed"]
+[connection signal="pressed" from="TopPanel/Margin/VBoxContainer/HBoxControls/BtnPauseMusic" to="." method="OnPauseResumeMusicPressed"]
+[connection signal="pressed" from="TopPanel/Margin/VBoxContainer/HBoxControls/BtnStopMusic" to="." method="OnFadeoutMusicPressed"]
+[connection signal="pressed" from="TopPanel/Margin/VBoxContainer/HBoxControls/BtnToggleEmitter" to="." method="OnToggleEmitterMovePressed"]

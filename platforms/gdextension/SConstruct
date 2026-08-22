@@ -1,0 +1,110 @@
+#!/usr/bin/env python
+
+# MIT License
+#
+# Copyright (c) 2026 Poing Studios
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import os
+
+env = SConscript("godot-cpp/SConstruct", {"api_version": "4.3"})
+
+fmod_sdk_dir = "thirdparty/fmod"
+
+# FMOD Include directories
+fmod_inc_dirs = [
+    "src/",
+    os.path.join(fmod_sdk_dir, "api/core/inc"),
+    os.path.join(fmod_sdk_dir, "api/studio/inc"),
+    os.path.join(fmod_sdk_dir, "core/inc"),
+    os.path.join(fmod_sdk_dir, "studio/inc"),
+    os.path.join(fmod_sdk_dir, "inc"),
+]
+
+env.Append(CPPPATH=[p for p in fmod_inc_dirs if os.path.exists(p) or "src" in p])
+
+# Platform specific library paths & linkage
+platform = env["platform"]
+target = env["target"]
+arch = env["arch"]
+
+out_dir = "../godot_editor/addons/godot_fmod/bin"
+
+if platform == "macos":
+    lib_search = [
+        os.path.join(fmod_sdk_dir, "api/core/lib"),
+        os.path.join(fmod_sdk_dir, "api/studio/lib"),
+        os.path.join(fmod_sdk_dir, "core/lib"),
+        os.path.join(fmod_sdk_dir, "studio/lib"),
+        os.path.join(fmod_sdk_dir, "lib"),
+        out_dir,
+    ]
+    env.Append(LIBPATH=[p for p in lib_search if os.path.exists(p)])
+    env.Append(LIBS=["fmod", "fmodstudio"])
+    env.Append(LINKFLAGS=["-Wl,-rpath,@loader_path"])
+
+elif platform == "windows":
+    win_arch = "x64" if arch == "x86_64" else "arm64" if arch == "arm64" else "x86"
+    lib_search = [
+        os.path.join(fmod_sdk_dir, "api/core/lib", win_arch),
+        os.path.join(fmod_sdk_dir, "api/studio/lib", win_arch),
+        os.path.join(fmod_sdk_dir, "core/lib", win_arch),
+        os.path.join(fmod_sdk_dir, "studio/lib", win_arch),
+        os.path.join(fmod_sdk_dir, "lib", win_arch),
+        out_dir,
+    ]
+    env.Append(LIBPATH=[p for p in lib_search if os.path.exists(p)])
+    env.Append(LIBS=["fmod_vc", "fmodstudio_vc"])
+
+elif platform == "linux":
+    linux_arch = "x86_64" if arch == "x86_64" else "arm64" if arch == "arm64" else "x86"
+    lib_search = [
+        os.path.join(fmod_sdk_dir, "api/core/lib", linux_arch),
+        os.path.join(fmod_sdk_dir, "api/studio/lib", linux_arch),
+        os.path.join(fmod_sdk_dir, "core/lib", linux_arch),
+        os.path.join(fmod_sdk_dir, "studio/lib", linux_arch),
+        os.path.join(fmod_sdk_dir, "lib", linux_arch),
+        out_dir,
+    ]
+    env.Append(LIBPATH=[p for p in lib_search if os.path.exists(p)])
+    env.Append(LIBS=["fmod", "fmodstudio"])
+    env.Append(LINKFLAGS=["-Wl,-rpath,'$$ORIGIN'"])
+
+# Source files
+sources = Glob("src/*.cpp") + Glob("src/**/*.cpp")
+
+if platform == "macos":
+    library = env.SharedLibrary(
+        "{}/libgodot_fmod.{}.{}.{}.dylib".format(out_dir, platform, target, arch),
+        source=sources,
+    )
+elif platform == "windows":
+    library = env.SharedLibrary(
+        "{}/libgodot_fmod.{}.{}.{}.dll".format(out_dir, platform, target, arch),
+        source=sources,
+    )
+else:
+    library = env.SharedLibrary(
+        "{}/libgodot_fmod.{}.{}.{}.so".format(out_dir, platform, target, arch),
+        source=sources,
+    )
+
+env.NoCache(library)
+Default(library)

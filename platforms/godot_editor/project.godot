@@ -1,0 +1,30 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="Godot FMOD"
+config/description="Direct FMOD Studio and FMOD Core GDExtension integration for Godot 4.x."
+run/main_scene="res://demo/demo_audio.tscn"
+config/features=PackedStringArray("4.7", "C#", "Forward Plus")
+config/icon="res://icon.svg"
+
+[display]
+
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[dotnet]
+
+project/assembly_name="Godot FMOD"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_fmod/plugin.cfg")
