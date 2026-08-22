@@ -165,7 +165,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
           tag_name: ${{ steps.version.outputs.TAG }}
-          name: Godot FMOD ${{ steps.version.outputs.TAG }}
+          name: ${{ steps.version.outputs.TAG }}
           files: platforms/godot_editor/${{ env.ZIP_NAME }}
           draft: false
           prerelease: false
