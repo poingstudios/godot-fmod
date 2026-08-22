@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://c6n7y2r3w4e5s"]
+[gd_scene load_steps=9 format=3 uid="uid://c6n7y2r3w4e5s"]
 
 [ext_resource type="Script" path="res://addons/fmod/csharp/sample/DemoAudio3DCSharp.cs" id="1_script"]
 
@@ -24,7 +24,7 @@ roughness = 0.8
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_floor"]
 material = SubResource("StandardMaterial3D_floor")
-size = Vector2(40, 40)
+size = Vector2(80, 80)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_listener"]
 albedo_color = Color(0.2, 0.8, 1, 1)
@@ -96,7 +96,7 @@ mouse_filter = 2
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 70.0
+offset_bottom = 75.0
 grow_horizontal = 2
 
 [node name="Margin" type="MarginContainer" parent="CanvasLayer/HUD/TopPanel"]
@@ -119,13 +119,13 @@ text = "🎵 FMOD 3D Spatial Audio Demo (C#)"
 [node name="StatusLabel" type="Label" parent="CanvasLayer/HUD/TopPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
-text = "Left Click anywhere in 3D to shoot | Right Click + Drag to rotate listener"
+text = "⌨️ WASD/Arrows: Move Listener | 🖱️ Right Drag: Rotate Listener | 🎯 Left Click: Shoot 3D"
 
 [node name="InfoLabel" type="Label" parent="CanvasLayer/HUD/TopPanel/Margin/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
 theme_override_font_sizes/font_size = 12
-text = "🚗 Car Position: (0.0, 0.0, 0.0) | 🎧 Distance: 0.0m"
+text = "🎧 Listener: (0,0,0) | 🚗 Car: (0,0,0) | 📏 Distance: 0.0m"
 
 [node name="ControlsPanel" type="PanelContainer" parent="CanvasLayer/HUD"]
 layout_mode = 1
@@ -133,8 +133,8 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -220.0
-offset_right = 380.0
+offset_top = -340.0
+offset_right = 420.0
 offset_bottom = -16.0
 grow_vertical = 0
 
@@ -147,43 +147,93 @@ theme_override_constants/margin_bottom = 12
 
 [node name="VBox" type="VBoxContainer" parent="CanvasLayer/HUD/ControlsPanel/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
-[node name="RPMLabel" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox"]
+[node name="GridSliders" type="GridContainer" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 6
+columns = 3
+
+[node name="RPMLabel" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
-text = "Engine RPM:"
+text = "RPM:"
 
-[node name="RPMSlider" type="HSlider" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox"]
+[node name="RPMSlider" type="HSlider" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
 layout_mode = 2
+size_flags_horizontal = 3
 min_value = 500.0
 max_value = 8000.0
 step = 50.0
 value = 3000.0
 
-[node name="RPMValue" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox"]
+[node name="RPMValue" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
+custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.9, 0.5, 1)
 theme_override_font_sizes/font_size = 11
 text = "3000 RPM"
 
-[node name="SpeedLabel" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox"]
+[node name="SpeedLabel" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
-text = "Orbit Speed:"
+text = "Speed:"
 
-[node name="SpeedSlider" type="HSlider" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox"]
+[node name="SpeedSlider" type="HSlider" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
 layout_mode = 2
+size_flags_horizontal = 3
 min_value = 0.0
 max_value = 4.0
 step = 0.1
 value = 1.2
 
-[node name="SpeedValue" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox"]
+[node name="SpeedValue" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
+custom_minimum_size = Vector2(65, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.9, 0.5, 1)
 theme_override_font_sizes/font_size = 11
 text = "1.2x"
+
+[node name="RadiusLabel" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Radius:"
+
+[node name="RadiusSlider" type="HSlider" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 2.0
+max_value = 25.0
+step = 0.5
+value = 6.0
+
+[node name="RadiusValue" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
+custom_minimum_size = Vector2(65, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 11
+text = "6.0m"
+
+[node name="HeightLabel" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Height:"
+
+[node name="HeightSlider" type="HSlider" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = -2.0
+max_value = 12.0
+step = 0.5
+value = 0.4
+
+[node name="HeightValue" type="Label" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/GridSliders"]
+custom_minimum_size = Vector2(65, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 11
+text = "0.4m"
 
 [node name="HBoxButtons" type="HBoxContainer" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox"]
 layout_mode = 2
@@ -192,14 +242,33 @@ theme_override_constants/separation = 6
 [node name="BtnPistol" type="Button" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/HBoxButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "🔫 3D Pistol"
+text = "🔫 Pistol"
 
 [node name="BtnExplosion" type="Button" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/HBoxButtons"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "💥 Explosion"
 
-[node name="BtnToggleCar" type="Button" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/HBoxButtons"]
+[node name="BtnWood" type="Button" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/HBoxButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🪵 Wood Impact"
+
+[node name="HBoxButtons2" type="HBoxContainer" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="BtnToggleCar" type="Button" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/HBoxButtons2"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "⏸ Pause"
+
+[node name="BtnReverse" type="Button" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/HBoxButtons2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🔄 Reverse"
+
+[node name="BtnReset" type="Button" parent="CanvasLayer/HUD/ControlsPanel/Margin/VBox/HBoxButtons2"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "📍 Reset Pos"

@@ -123,6 +123,8 @@ bool FmodServer::initialize(int p_max_channels, int p_studio_flags, int p_core_f
 	res = singleton->studio_system->getCoreSystem(&singleton->core_system);
 	FMOD_CHECK_ERR(res, "getCoreSystem failed");
 
+	p_core_flags |= FMOD_INIT_3D_RIGHTHANDED;
+
 	res = singleton->studio_system->initialize(p_max_channels, p_studio_flags, p_core_flags, nullptr);
 	FMOD_CHECK_ERR(res, "studio_system->initialize failed");
 
