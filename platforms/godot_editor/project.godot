@@ -28,3 +28,7 @@ project/assembly_name="Godot FMOD"
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/fmod/plugin.cfg")
+
+[fmod]
+
+banks/banks_path="res://banks/Desktop/"

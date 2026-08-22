@@ -1,0 +1,386 @@
+[gd_scene format=3 uid="uid://fmod_studio_main_screen"]
+
+[ext_resource type="Script" path="res://addons/fmod/internal/ui/fmod_main_screen.gd" id="1_main_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_main"]
+bg_color = Color(0.12, 0.13, 0.16, 1)
+
+[node name="FmodMainScreen" type="PanelContainer"]
+clip_contents = true
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_main")
+script = ExtResource("1_main_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TopBar" type="PanelContainer" parent="Margin/VBox"]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Margin/VBox/TopBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BrandTitle" type="Label" parent="Margin/VBox/TopBar/Margin/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "🎵 FMOD Studio Workstation"
+
+[node name="StatusBadge" type="Label" parent="Margin/VBox/TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.3, 0.9, 0.4, 1)
+text = "● FMOD READY"
+
+[node name="BtnReloadBanks" type="Button" parent="Margin/VBox/TopBar/Margin/HBox"]
+layout_mode = 2
+text = "🔄 Reload Banks"
+
+[node name="BtnPanicStop" type="Button" parent="Margin/VBox/TopBar/Margin/HBox"]
+layout_mode = 2
+text = "⏹ Stop All Sounds"
+
+[node name="HSplit" type="HSplitContainer" parent="Margin/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="LeftPanel" type="PanelContainer" parent="Margin/VBox/HSplit"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.32
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/HSplit/LeftPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/HSplit/LeftPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SearchInput" type="LineEdit" parent="Margin/VBox/HSplit/LeftPanel/Margin/VBox"]
+layout_mode = 2
+placeholder_text = "Filter added events..."
+clear_button_enabled = true
+
+[node name="EventTree" type="Tree" parent="Margin/VBox/HSplit/LeftPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+hide_root = true
+
+[node name="BankHeader" type="Label" parent="Margin/VBox/HSplit/LeftPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.7, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "📦 Discovered Banks in Project:"
+
+[node name="BankList" type="ItemList" parent="Margin/VBox/HSplit/LeftPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+auto_height = true
+
+[node name="RightPanel" type="PanelContainer" parent="Margin/VBox/HSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.68
+
+[node name="TabContainer" type="TabContainer" parent="Margin/VBox/HSplit/RightPanel"]
+layout_mode = 2
+current_tab = 0
+
+[node name="Audition" type="ScrollContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+metadata/_tab_index = 0
+
+[node name="Margin" type="MarginContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="EventTitle" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "No event selected (Add or select an event on the left)"
+autowrap_mode = 2
+
+[node name="EventMeta" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+text = "Duration: --- | Mode: --- | Type: ---"
+autowrap_mode = 2
+
+[node name="TransportHBox" type="HBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BtnPlay" type="Button" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/TransportHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "▶ Play Audition"
+
+[node name="BtnPause" type="Button" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/TransportHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "⏸ Pause"
+
+[node name="BtnStop" type="Button" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/TransportHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "⏹ Stop"
+
+[node name="TimelineHBox" type="HBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TimelineSlider" type="HSlider" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/TimelineHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="TimeLabel" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/TimelineHBox"]
+custom_minimum_size = Vector2(85, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+text = "00:00 / 00:00"
+horizontal_alignment = 2
+
+[node name="SlidersGrid" type="GridContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 8
+columns = 3
+
+[node name="PitchLabel" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/SlidersGrid"]
+layout_mode = 2
+text = "Pitch:"
+
+[node name="PitchSlider" type="HSlider" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/SlidersGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+min_value = 0.5
+max_value = 2.0
+step = 0.05
+value = 1.0
+
+[node name="PitchVal" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/SlidersGrid"]
+custom_minimum_size = Vector2(45, 0)
+layout_mode = 2
+text = "1.00x"
+
+[node name="VolLabel" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/SlidersGrid"]
+layout_mode = 2
+text = "Audition Vol:"
+
+[node name="VolSlider" type="HSlider" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/SlidersGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 1.0
+
+[node name="VolVal" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/SlidersGrid"]
+custom_minimum_size = Vector2(45, 0)
+layout_mode = 2
+text = "100%"
+
+[node name="ParamSection" type="PanelContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/ParamSection"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ParamVBox" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/ParamSection/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HBoxAddParam" type="HBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/ParamSection/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ParamInput" type="LineEdit" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/ParamSection/VBox/HBoxAddParam"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Add event parameter name (e.g. RPM, Progression)..."
+
+[node name="BtnAddParam" type="Button" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Audition/Margin/VBox/ParamSection/VBox/HBoxAddParam"]
+layout_mode = 2
+text = "➕ Add Parameter Slider"
+
+[node name="Mixer" type="MarginContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+metadata/_tab_index = 1
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 16
+
+[node name="BusesSection" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox/BusesSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "🔊 Submix Audio Buses"
+
+[node name="BusGrid" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox/BusesSection"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HBoxAdd" type="HBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox/BusesSection"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BusInput" type="LineEdit" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox/BusesSection/HBoxAdd"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Add bus path (e.g. bus:/SFX, bus:/Music)..."
+
+[node name="BtnAddBus" type="Button" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox/BusesSection/HBoxAdd"]
+layout_mode = 2
+text = "➕ Add Bus Strip"
+
+[node name="VCASection" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox/VCASection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.7, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "🎚️ VCAs (Voltage Controlled Amplifiers)"
+
+[node name="VCAGrid" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox/VCASection"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HBoxAdd" type="HBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox/VCASection"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="VCAInput" type="LineEdit" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox/VCASection/HBoxAdd"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Add VCA path (e.g. vca:/Player, vca:/Music)..."
+
+[node name="BtnAddVCA" type="Button" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Mixer/Scroll/VBox/VCASection/HBoxAdd"]
+layout_mode = 2
+text = "➕ Add VCA Fader"
+
+[node name="Globals" type="MarginContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+metadata/_tab_index = 2
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Globals"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Globals/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Globals/Scroll/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+text = "🌐 Global System Parameters"
+
+[node name="ParamGrid" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Globals/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HBoxAdd" type="HBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Globals/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ParamInput" type="LineEdit" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Globals/Scroll/VBox/HBoxAdd"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Add global parameter name (e.g. DangerLevel, Weather)..."
+
+[node name="BtnAddParam" type="Button" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Globals/Scroll/VBox/HBoxAdd"]
+layout_mode = 2
+text = "➕ Add Parameter"
+
+[node name="Banks" type="MarginContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer"]
+visible = false
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+metadata/_tab_index = 3
+
+[node name="Scroll" type="ScrollContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Banks"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="VBox" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Banks/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Banks/Scroll/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "📦 Bank Lifecycle & Memory Manager"
+
+[node name="BankGrid" type="VBoxContainer" parent="Margin/VBox/HSplit/RightPanel/TabContainer/Banks/Scroll/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
