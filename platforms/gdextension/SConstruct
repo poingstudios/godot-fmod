@@ -45,7 +45,7 @@ platform = env["platform"]
 target = env["target"]
 arch = env["arch"]
 
-out_dir = "../godot_editor/addons/godot_fmod/bin"
+out_dir = "../godot_editor/addons/fmod/bin"
 
 if platform == "macos":
     lib_search = [

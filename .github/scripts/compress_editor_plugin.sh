@@ -9,14 +9,14 @@ echo ">>> Compressing Godot FMOD Plugin..."
 
 cd platforms/godot_editor
 
-RAW_VERSION=$(grep "version=" addons/godot_fmod/plugin.cfg | cut -d'"' -f2)
+RAW_VERSION=$(grep "version=" addons/fmod/plugin.cfg | cut -d'"' -f2)
 CH_VERSION=${RAW_VERSION#v}
 ZIP_NAME="godot-fmod-v${CH_VERSION}.zip"
 
 echo "Version detected: $CH_VERSION"
 
 mkdir -p build_stage/addons
-cp -R addons/godot_fmod build_stage/addons/
+cp -R addons/fmod build_stage/addons/
 
 cd build_stage
 zip -qr "$ZIP_NAME" addons

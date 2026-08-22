@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dm0audio_csharp_sample"]
 
-[ext_resource type="Script" path="res://addons/godot_fmod/csharp/sample/DemoAudioCSharp.cs" id="1_csharp_script"]
+[ext_resource type="Script" path="res://addons/fmod/csharp/sample/DemoAudioCSharp.cs" id="1_csharp_script"]
 [ext_resource type="Texture2D" uid="uid://dr0gmsiavr3pp" path="res://icon.svg" id="2_icon"]
 
 [node name="DemoAudioCSharp" type="Control"]

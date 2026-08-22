@@ -22,7 +22,7 @@
 ## Installation
 
 1. Download the latest `godot-fmod-v*.zip` from [Releases](https://github.com/poingstudios/godot-fmod/releases).
-2. Extract the `addons/godot_fmod` directory into your project's `res://addons/` folder.
+2. Extract the `addons/fmod` directory into your project's `res://addons/` folder.
 3. Enable the plugin in **Project Settings -> Plugins**.
 
 ---

@@ -46,13 +46,18 @@ godot-fmod/
 │       ├── project.godot    # Godot 4.x testbed project
 │       ├── icon.svg
 │       └── addons/
-│           └── godot_fmod/
+│           └── fmod/
+│               ├── LICENSE  # MIT license
 │               ├── bin/     # Native binaries (.dylib, .so, .dll) + FMOD shared libs
 │               │   └── .gdignore
 │               ├── icons/   # Custom node icons (SVG)
 │               ├── internal/# Internal GDScript implementation (no class_name, preload only)
 │               │   └── services/
 │               │       └── csharp_service.gd # Auto-hides csharp/ folder via .gdignore
+│               ├── gdscript/ # GDScript samples & utilities
+│               │   └── sample/
+│               │       ├── DemoAudioGDScript.gd
+│               │       └── DemoAudioGDScript.tscn
 │               ├── csharp/  # C# typed wrapper classes (namespace: PoingStudios.GodotFmod)
 │               │   ├── sample/
 │               │   │   ├── DemoAudioCSharp.cs
@@ -71,9 +76,9 @@ godot-fmod/
 │               │           ├── FmodListener2D.cs
 │               │           ├── FmodListener3D.cs
 │               │           └── FmodNodeExtensions.cs
-│               ├── godot_fmod.gdextension # GDExtension manifest
-│               ├── plugin.cfg             # Addon metadata
-│               └── plugin.gd              # EditorPlugin entry point
+│               ├── fmod.gdextension # GDExtension manifest
+│               ├── plugin.cfg       # Addon metadata
+│               └── plugin.gd        # EditorPlugin entry point
 └── scripts/
     ├── build_local.sh       # Automated local build script
     └── setup_fmod_sdk.sh    # Helper script to download/link FMOD SDK headers and libs
@@ -148,14 +153,14 @@ scons -C platforms/gdextension platform=windows target=template_debug arch=x86_6
 ### C# Rules & 1:1 API Parity
 
 1. **1:1 API Parity**: Maintain **1:1 API parity** between C# wrappers (`PoingStudios.GodotFmod`) and GDExtension C++ `ClassDB` bindings at all times.
-2. **Synchronized Updates**: Whenever a new method, property, or enum is added to or modified in the C++ GDExtension layer, the corresponding C# wrapper under `addons/godot_fmod/csharp/src/` **must** be updated synchronously.
+2. **Synchronized Updates**: Whenever a new method, property, or enum is added to or modified in the C++ GDExtension layer, the corresponding C# wrapper under `addons/fmod/csharp/src/` **must** be updated synchronously.
 3. **Naming & Style**: Use standard C# `PascalCase` for method names, properties, and enum members while wrapping snake_case `ClassDB` methods.
 4. **Auto-Visibility**: The `csharp/` directory visibility is automatically managed by `internal/services/csharp_service.gd` via `.gdignore` based on project type.
 
 ### GDScript Rules
 
 1. **Type Inference**: Always use `:=` instead of `=` for variable assignments.
-2. **`internal/` Encapsulation**: The `internal/` directory inside `addons/godot_fmod/` **must not** contain any script with `class_name`. All internal scripts must be loaded explicitly using `preload(...)`.
+2. **`internal/` Encapsulation**: The `internal/` directory inside `addons/fmod/` **must not** contain any script with `class_name`. All internal scripts must be loaded explicitly using `preload(...)`.
 3. **Tabs Indentation**: Use tabs for indentation, not spaces.
 
 ### General & Licensing Rules

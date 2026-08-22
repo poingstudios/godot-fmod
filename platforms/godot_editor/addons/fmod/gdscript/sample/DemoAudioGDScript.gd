@@ -47,7 +47,7 @@ func _ready() -> void:
 
 	spatial_emitter.set_parameters({"RPM": 2000.0, "Load": 0.5})
 
-	status_label.text = "Click anywhere across the full screen to test spatial sound!"
+	status_label.text = "[GDScript] Click anywhere across the full screen to test spatial sound!"
 
 	param_slider.value_changed.connect(_on_param_slider_changed)
 	rpm_slider.value_changed.connect(_on_rpm_slider_changed)
@@ -68,35 +68,33 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(_delta: float) -> void:
 	FmodServer.update()
 
-	if is_moving_emitter:
-		var time := Time.get_ticks_msec() / 1000.0
+	if is_moving_emitter and spatial_emitter:
+		var time := float(Time.get_ticks_msec()) / 1000.0
 		var screen_width := get_viewport_rect().size.x
 		var x_pos := (sin(time * 1.5) * 0.4 + 0.5) * screen_width
 		spatial_emitter.position.x = x_pos
 		spatial_emitter.position.y = 520.0
 
 func _fire_shot_at(click_pos: Vector2) -> void:
-	# Check hit on moving emitter logo
-	var emitter_pos := spatial_emitter.position
+	var emitter_pos := spatial_emitter.position if spatial_emitter else Vector2.ZERO
 	if (click_pos - emitter_pos).length() <= 50.0:
 		FmodServer.play_one_shot_2d("event:/Interactables/Wooden Collision", emitter_pos)
-		status_label.text = "🎯 DIRECT HIT on Moving Logo! (Wooden Collision)"
-		_punch_icon(spatial_icon, Vector2(0.4, 0.4), Vector2(0.65, 0.65))
+		status_label.text = "[GDScript] 🎯 DIRECT HIT on Moving Logo! (Wooden Collision)"
+		if spatial_icon:
+			_punch_icon(spatial_icon, Vector2(0.4, 0.4), Vector2(0.65, 0.65))
 		_spawn_visual_shot(click_pos, "DIRECT HIT!", Color(1.0, 0.9, 0.2))
 		return
 
-	# Check hit on center listener logo
-	var listener_pos := listener_node.position
+	var listener_pos := listener_node.position if listener_node else Vector2(576, 324)
 	if (click_pos - listener_pos).length() <= 50.0:
-		var listener_icon := listener_node.get_node("ListenerIcon") as Sprite2D
+		var listener_icon := listener_node.get_node_or_null("ListenerIcon") as Sprite2D
 		FmodServer.play_one_shot("event:/Interactables/Wooden Collision")
-		status_label.text = "🎧 DIRECT HIT on Center Listener! (Wooden Collision)"
-		if listener_icon != null:
+		status_label.text = "[GDScript] 🎧 DIRECT HIT on Center Listener! (Wooden Collision)"
+		if listener_icon:
 			_punch_icon(listener_icon, Vector2(0.5, 0.5), Vector2(0.8, 0.8))
 		_spawn_visual_shot(click_pos, "LISTENER HIT!", Color(0.3, 0.9, 1.0))
 		return
 
-	# Otherwise fire spatial pistol shot
 	FmodServer.play_one_shot_2d("event:/Weapons/Pistol", click_pos)
 
 	var dx := click_pos.x - listener_pos.x
@@ -108,7 +106,12 @@ func _fire_shot_at(click_pos: Vector2) -> void:
 	elif dx > 30.0:
 		side_str = "Right Ear (" + str(int(dx)) + "px)"
 
-	status_label.text = "Shot at (" + str(int(click_pos.x)) + ", " + str(int(click_pos.y)) + ") -> " + side_str + " | ~" + str(snappedf(distance_m, 0.1)) + "m"
+	status_label.text = "[GDScript] Shot at (%d, %d) -> %s | ~%.1fm" % [
+		int(click_pos.x),
+		int(click_pos.y),
+		side_str,
+		distance_m
+	]
 	_spawn_visual_shot(click_pos, side_str)
 
 func _punch_icon(sprite: Sprite2D, base_scale: Vector2, punch_scale: Vector2) -> void:
@@ -125,6 +128,7 @@ func _spawn_visual_shot(pos: Vector2, text_info: String, shot_color: Color = Col
 	circle.size = Vector2(16, 16)
 	circle.position = Vector2(-8, -8)
 	circle.color = shot_color
+	circle.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	marker.add_child(circle)
 
 	var label := Label.new()
@@ -133,62 +137,72 @@ func _spawn_visual_shot(pos: Vector2, text_info: String, shot_color: Color = Col
 	label.size = Vector2(150, 25)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.modulate = shot_color
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	marker.add_child(label)
 
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(circle, "scale", Vector2(3.0, 3.0), 0.4)
-	tween.tween_property(marker, "modulate:a", 0.0, 0.4)
+	tween.tween_property(circle, "scale", Vector2(3.0, 3.0), 0.3)
+	tween.tween_property(marker, "modulate:a", 0.0, 0.3)
 	tween.chain().tween_callback(marker.queue_free)
 
 func _on_play_sfx_pressed() -> void:
 	FmodServer.play_one_shot("event:/Weapons/Explosion")
-	status_label.text = "Played One-Shot SFX: Weapons/Explosion (Center)"
+	status_label.text = "[GDScript] Played One-Shot SFX: Weapons/Explosion (Center)"
 
 func _on_start_music_pressed() -> void:
-	if music_instance == null:
+	if not music_instance or not music_instance.is_valid():
 		music_instance = FmodServer.create_event_instance("event:/Music/Level 01")
-
-	if music_instance != null:
+		if music_instance:
+			music_instance.set_parameter_by_name("Progression", param_slider.value)
+			music_instance.start()
+			status_label.text = "[GDScript] Started Music: Level 01"
+	elif music_instance.get_playback_state() == FmodServer.PLAYBACK_STOPPED:
 		music_instance.start()
-		status_label.text = "Started Music: Level 01"
+		status_label.text = "[GDScript] Restarted Music: Level 01"
 
 func _on_pause_music_pressed() -> void:
-	if music_instance != null:
-		var current_paused := music_instance.get_paused()
-		music_instance.set_paused(!current_paused)
-		status_label.text = "Music Paused: " + str(!current_paused)
+	if music_instance and music_instance.is_valid():
+		var is_paused := music_instance.get_paused()
+		music_instance.set_paused(not is_paused)
+		status_label.text = "[GDScript] Music Paused" if not is_paused else "[GDScript] Music Resumed"
 
 func _on_stop_music_pressed() -> void:
-	if music_instance != null:
+	if music_instance and music_instance.is_valid():
 		music_instance.stop(FmodServer.STOP_ALLOWFADEOUT)
-		status_label.text = "Music Stopped (Fadeout)"
+		status_label.text = "[GDScript] Music Stopped (Fadeout)"
 
 func _on_toggle_emitter_pressed() -> void:
 	if spatial_emitter.is_playing():
 		spatial_emitter.stop(FmodServer.STOP_ALLOWFADEOUT)
-		status_label.text = "Spatial Emitter Stopped"
+		status_label.text = "[GDScript] Spatial Emitter Stopped"
 	else:
 		spatial_emitter.play()
-		status_label.text = "Spatial Emitter Playing (Panning left/right)"
+		status_label.text = "[GDScript] Spatial Emitter Playing (Panning left/right)"
 
 func _on_param_slider_changed(value: float) -> void:
-	param_value_label.text = str(snappedf(value, 0.01))
-	if music_instance != null:
+	param_value_label.text = "%.1f" % value
+	if music_instance and music_instance.is_valid():
 		music_instance.set_parameter_by_name("Progression", value)
+		status_label.text = "[GDScript] Level 01 Progression: %.1f" % value
 
 func _on_rpm_slider_changed(value: float) -> void:
-	rpm_value_label.text = str(int(value))
-	spatial_emitter.set_parameter("RPM", value)
+	rpm_value_label.text = "%d RPM" % int(value)
+	if spatial_emitter:
+		spatial_emitter.set_parameter("RPM", value)
+		status_label.text = "[GDScript] Car Engine RPM: %d" % int(value)
 
 func _on_volume_slider_changed(value: float) -> void:
-	volume_value_label.text = str(snappedf(value, 0.01))
+	volume_value_label.text = "%d%%" % int(value * 100)
 	var master_bus := FmodServer.get_bus("bus:/")
-	if master_bus != null:
+	if master_bus and master_bus.is_valid():
 		master_bus.set_volume(value)
+		status_label.text = "[GDScript] Master Bus Volume: %d%%" % int(value * 100)
 
 func _exit_tree() -> void:
-	if music_instance != null:
+	if music_instance and music_instance.is_valid():
+		music_instance.stop(FmodServer.STOP_IMMEDIATE)
 		music_instance.release()
 		music_instance = null
+	FmodServer.unload_all_banks()
 	FmodServer.shutdown()

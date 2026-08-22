@@ -103,7 +103,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: binary-${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}
-          path: platforms/godot_editor/addons/godot_fmod/bin/*
+          path: platforms/godot_editor/addons/fmod/bin/*
 
   create-release:
     name: Package & Create Release
@@ -121,27 +121,27 @@ jobs:
           elif [ "${{ github.ref_type }}" = "tag" ]; then
             TAG="${{ github.ref_name }}"
           else
-            PLUGIN_VERSION=$(grep 'version=' platforms/godot_editor/addons/godot_fmod/plugin.cfg | cut -d'"' -f2)
+            PLUGIN_VERSION=$(grep 'version=' platforms/godot_editor/addons/fmod/plugin.cfg | cut -d'"' -f2)
             TAG="v${PLUGIN_VERSION:-1.0.0}"
           fi
           echo "TAG=$TAG" >> $GITHUB_OUTPUT
 
       - name: Prepare Plugin Directory
         run: |
-          mkdir -p platforms/godot_editor/addons/godot_fmod/bin
-          touch platforms/godot_editor/addons/godot_fmod/bin/.gdignore
+          mkdir -p platforms/godot_editor/addons/fmod/bin
+          touch platforms/godot_editor/addons/fmod/bin/.gdignore
 
       - name: Download All Binaries
         uses: actions/download-artifact@v4
         with:
           pattern: binary-*
           merge-multiple: true
-          path: platforms/godot_editor/addons/godot_fmod/bin
+          path: platforms/godot_editor/addons/fmod/bin
 
       - name: Verify Binary Files
         run: |
           echo ">>> Binaries received:"
-          ls -la platforms/godot_editor/addons/godot_fmod/bin
+          ls -la platforms/godot_editor/addons/fmod/bin
 
       - name: Create Release Zip Package
         run: ./.github/scripts/compress_editor_plugin.sh

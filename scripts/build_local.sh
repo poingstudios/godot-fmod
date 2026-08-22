@@ -55,7 +55,7 @@ echo ">>> Building Godot FMOD ($PLATFORM, $TARGET, $ARCH) with $NPROC jobs..."
 scons -C platforms/gdextension platform="$PLATFORM" target="$TARGET" arch="$ARCH" -j"$NPROC"
 
 if [ $? -eq 0 ]; then
-    echo ">>> Build completed successfully! Binaries updated in platforms/godot_editor/addons/godot_fmod/bin"
+    echo ">>> Build completed successfully! Binaries updated in platforms/godot_editor/addons/fmod/bin"
 else
     echo ">>> Build failed!"
     exit 1

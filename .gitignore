@@ -32,8 +32,8 @@ platforms/gdextension/godot-cpp/gen/
 *.pdb
 
 # Compiled GDExtension binaries & proprietary libraries
-platforms/godot_editor/addons/godot_fmod/bin/*
-!platforms/godot_editor/addons/godot_fmod/bin/.gdignore
+platforms/godot_editor/addons/fmod/bin/*
+!platforms/godot_editor/addons/fmod/bin/.gdignore
 platforms/gdextension/thirdparty/fmod/api/
 *.dylib
 *.so
@@ -64,4 +64,4 @@ tmp/
 .antigravitycli/
 compile_commands.json
 platforms/gdextension/compile_commands.json
-platforms/godot_editor/addons/godot_fmod/csharp/.gdignore
+platforms/godot_editor/addons/fmod/csharp/.gdignore

@@ -30,7 +30,7 @@ static func manage_visibility(editor_plugin: EditorPlugin = null) -> void:
 			is_csharp_project = true
 			break
 
-	var csharp_gdignore_path := "res://addons/godot_fmod/csharp/.gdignore"
+	var csharp_gdignore_path := "res://addons/fmod/csharp/.gdignore"
 	var should_hide := not is_mono_version or not is_csharp_project
 	var file_system_modified := false
 
@@ -40,7 +40,7 @@ static func manage_visibility(editor_plugin: EditorPlugin = null) -> void:
 			file_system_modified = true
 	else:
 		if not FileAccess.file_exists(csharp_gdignore_path):
-			var dir_access := DirAccess.open("res://addons/godot_fmod")
+			var dir_access := DirAccess.open("res://addons/fmod")
 			if dir_access and not dir_access.dir_exists("csharp"):
 				dir_access.make_dir_recursive("csharp")
 

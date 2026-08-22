@@ -64,6 +64,8 @@ public partial class DemoAudioCSharp : Control
 		FmodServer.LoadBank("res://banks/Desktop/SFX.bank");
 		FmodServer.LoadBank("res://banks/Desktop/Vehicles.bank");
 
+		_spatialEmitter?.SetParameter("RPM", 2000.0f);
+
 		_statusLabel.Text = "[C#] Click anywhere across the screen to test spatial audio!";
 
 		_paramSlider.ValueChanged += OnParamSliderChanged;
@@ -94,20 +96,16 @@ public partial class DemoAudioCSharp : Control
 		if (_isMovingEmitter && _spatialEmitterNode != null)
 		{
 			float time = (float)Time.GetTicksMsec() / 1000.0f;
-			Vector2 center = new Vector2(576, 324);
-			float radiusX = 350.0f;
-			float radiusY = 160.0f;
-			_spatialEmitterNode.Position = new Vector2(
-				center.X + Mathf.Cos(time * 0.7f) * radiusX,
-				center.Y + Mathf.Sin(time * 0.7f) * radiusY
-			);
+			float screenWidth = GetViewportRect().Size.X;
+			float xPos = (Mathf.Sin(time * 1.5f) * 0.4f + 0.5f) * screenWidth;
+			_spatialEmitterNode.Position = new Vector2(xPos, 520.0f);
 		}
 	}
 
 	public void OnPlaySfxPressed()
 	{
 		FmodServer.PlayOneShot("event:/Weapons/Explosion");
-		_statusLabel.Text = "[C#] SFX Played: event:/Weapons/Explosion (2D Global)";
+		_statusLabel.Text = "[C#] Played One-Shot SFX: Weapons/Explosion (Center)";
 	}
 
 	public void OnStartMusicPressed()
@@ -117,12 +115,12 @@ public partial class DemoAudioCSharp : Control
 			_musicInstance = FmodServer.CreateEventInstance("event:/Music/Level 01");
 			_musicInstance?.SetParameterByName("Progression", (float)_paramSlider.Value);
 			_musicInstance?.Start();
-			_statusLabel.Text = "[C#] Music Started: Level 01";
+			_statusLabel.Text = "[C#] Started Music: Level 01";
 		}
 		else if (_musicInstance.GetPlaybackState() == PlaybackState.Stopped)
 		{
 			_musicInstance.Start();
-			_statusLabel.Text = "[C#] Music Restarted: Level 01";
+			_statusLabel.Text = "[C#] Restarted Music: Level 01";
 		}
 	}
 
@@ -141,14 +139,22 @@ public partial class DemoAudioCSharp : Control
 		if (_musicInstance != null && _musicInstance.IsValid)
 		{
 			_musicInstance.Stop(StopMode.AllowFadeout);
-			_statusLabel.Text = "[C#] Music Stopping with Fadeout...";
+			_statusLabel.Text = "[C#] Music Stopped (Fadeout)";
 		}
 	}
 
 	public void OnToggleEmitterMovePressed()
 	{
-		_isMovingEmitter = !_isMovingEmitter;
-		_statusLabel.Text = _isMovingEmitter ? "[C#] Car Emitter: Moving Orbit" : "[C#] Car Emitter: Stationary";
+		if (_spatialEmitter != null && _spatialEmitter.IsPlaying)
+		{
+			_spatialEmitter.Stop(StopMode.AllowFadeout);
+			_statusLabel.Text = "[C#] Spatial Emitter Stopped";
+		}
+		else if (_spatialEmitter != null)
+		{
+			_spatialEmitter.Play();
+			_statusLabel.Text = "[C#] Spatial Emitter Playing (Panning left/right)";
+		}
 	}
 
 	private void OnParamSliderChanged(double value)
@@ -181,11 +187,86 @@ public partial class DemoAudioCSharp : Control
 
 	private void FireShotAt(Vector2 clickPos)
 	{
+		Vector2 emitterPos = _spatialEmitterNode != null ? _spatialEmitterNode.Position : Vector2.Zero;
+		if ((clickPos - emitterPos).Length() <= 50.0f)
+		{
+			FmodServer.PlayOneShot2D("event:/Interactables/Wooden Collision", emitterPos);
+			_statusLabel.Text = "[C#] 🎯 DIRECT HIT on Moving Logo! (Wooden Collision)";
+			if (_spatialIcon != null)
+			{
+				PunchIcon(_spatialIcon, new Vector2(0.4f, 0.4f), new Vector2(0.65f, 0.65f));
+			}
+			SpawnVisualShot(clickPos, "DIRECT HIT!", new Color(1.0f, 0.9f, 0.2f));
+			return;
+		}
+
+		Vector2 listenerPos = _listenerNode != null ? _listenerNode.Position : new Vector2(576, 324);
+		if ((clickPos - listenerPos).Length() <= 50.0f)
+		{
+			Sprite2D listenerIcon = _listenerNode.GetNodeOrNull<Sprite2D>("ListenerIcon");
+			FmodServer.PlayOneShot("event:/Interactables/Wooden Collision");
+			_statusLabel.Text = "[C#] 🎧 DIRECT HIT on Center Listener! (Wooden Collision)";
+			if (listenerIcon != null)
+			{
+				PunchIcon(listenerIcon, new Vector2(0.5f, 0.5f), new Vector2(0.8f, 0.8f));
+			}
+			SpawnVisualShot(clickPos, "LISTENER HIT!", new Color(0.3f, 0.9f, 1.0f));
+			return;
+		}
+
 		FmodServer.PlayOneShot2D("event:/Weapons/Pistol", clickPos);
-		Vector2 center = _listenerNode != null ? _listenerNode.Position : new Vector2(576, 324);
-		float distMeters = (clickPos - center).Length() * 0.02f;
-		string side = clickPos.X < center.X ? "LEFT" : "RIGHT";
-		_statusLabel.Text = $"[C#] 🔫 Pistol Shot at ({clickPos.X:0}, {clickPos.Y:0}) — {distMeters:0.1}m {side}";
+
+		float dx = clickPos.X - listenerPos.X;
+		float distanceM = (clickPos - listenerPos).Length() * 0.02f;
+
+		string sideStr = "Center";
+		if (dx < -30.0f)
+		{
+			sideStr = $"Left Ear ({(int)Mathf.Abs(dx)}px)";
+		}
+		else if (dx > 30.0f)
+		{
+			sideStr = $"Right Ear ({(int)dx}px)";
+		}
+
+		_statusLabel.Text = $"[C#] Shot at ({(int)clickPos.X}, {(int)clickPos.Y}) -> {sideStr} | ~{distanceM:0.1}m";
+		SpawnVisualShot(clickPos, sideStr, new Color(1.0f, 0.3f, 0.2f, 1.0f));
+	}
+
+	private void PunchIcon(Sprite2D sprite, Vector2 baseScale, Vector2 punchScale)
+	{
+		Tween tween = CreateTween();
+		tween.TweenProperty(sprite, "scale", punchScale, 0.08).SetTrans(Tween.TransitionType.Back).SetEase(Tween.EaseType.Out);
+		tween.TweenProperty(sprite, "scale", baseScale, 0.15).SetTrans(Tween.TransitionType.Elastic).SetEase(Tween.EaseType.Out);
+	}
+
+	private void SpawnVisualShot(Vector2 pos, string textInfo, Color shotColor)
+	{
+		Node2D marker = new Node2D();
+		marker.Position = pos;
+		AddChild(marker);
+
+		ColorRect circle = new ColorRect();
+		circle.Size = new Vector2(16, 16);
+		circle.Position = new Vector2(-8, -8);
+		circle.Color = shotColor;
+		circle.MouseFilter = Control.MouseFilterEnum.Ignore;
+		marker.AddChild(circle);
+
+		Label label = new Label();
+		label.Text = "🎯 " + textInfo;
+		label.Position = new Vector2(-75, -30);
+		label.Size = new Vector2(150, 25);
+		label.HorizontalAlignment = HorizontalAlignment.Center;
+		label.Modulate = shotColor;
+		label.MouseFilter = Control.MouseFilterEnum.Ignore;
+		marker.AddChild(label);
+
+		Tween tween = CreateTween();
+		tween.SetParallel(true);
+		tween.TweenProperty(circle, "scale", new Vector2(3.0f, 3.0f), 0.3f);
+		tween.TweenProperty(marker, "modulate:a", 0.0f, 0.3f);
+		tween.Chain().TweenCallback(Callable.From(marker.QueueFree));
 	}
 
 	public override void _ExitTree()

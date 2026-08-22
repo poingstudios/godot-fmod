@@ -23,7 +23,7 @@
 @tool
 extends EditorPlugin
 
-const CSharpService := preload("res://addons/godot_fmod/internal/services/csharp_service.gd")
+const CSharpService := preload("res://addons/fmod/internal/services/csharp_service.gd")
 
 func _enter_tree() -> void:
 	CSharpService.manage_visibility(self)
