@@ -2,20 +2,20 @@
 # MIT License
 # Copyright (c) 2026 Poing Studios
 
+import base64
 import glob
+import json
 import os
 import shutil
 import subprocess
 import sys
 import tarfile
 import tempfile
-import warnings
+import urllib.error
+import urllib.parse
+import urllib.request
 
-warnings.filterwarnings("ignore")
-
-import requests
-
-# 1. Secure Credential Retrieval (Environment variables only to avoid process listing leakage)
+# 1. Secure Credential Retrieval
 user = os.environ.get("FMOD_USER") or os.environ.get("FMOD_USERNAME") or os.environ.get("FMODUSER")
 password = os.environ.get("FMOD_PASSWORD") or os.environ.get("FMOD_PASS") or os.environ.get("FMODPASS")
 platform = sys.argv[1].lower() if len(sys.argv) > 1 else ("macos" if sys.platform == "darwin" else "windows" if sys.platform == "win32" else "linux")
@@ -44,12 +44,19 @@ bin_dest = os.path.abspath("platforms/godot_editor/addons/fmod/bin")
 os.makedirs(f"{sdk_dest}/api", exist_ok=True)
 os.makedirs(bin_dest, exist_ok=True)
 
-# 2. Authenticate with FMOD API (HTTPS + timeout)
+# 2. Authenticate with FMOD API (using pure standard library urllib)
 print(">>> Authenticating with fmod.com...")
+auth_header = "Basic " + base64.b64encode(f"{user}:{password}".encode("utf-8")).decode("ascii")
+auth_req = urllib.request.Request(
+    "https://www.fmod.com/api-login",
+    data=b"",
+    headers={"Authorization": auth_header, "User-Agent": "GodotFmodProvisioner/1.0"},
+    method="POST",
+)
+
 try:
-    auth_resp = requests.post("https://www.fmod.com/api-login", auth=(user, password), timeout=30)
-    auth_resp.raise_for_status()
-    token = auth_resp.json().get("token")
+    with urllib.request.urlopen(auth_req, timeout=30) as resp:
+        token = json.loads(resp.read().decode("utf-8")).get("token")
 except Exception:
     print("Error: Authentication with fmod.com failed. Verify credentials.")
     sys.exit(1)
@@ -58,12 +65,17 @@ if not token:
     print("Error: Authentication token missing in response.")
     sys.exit(1)
 
-# 3. Resolve Download Link (HTTPS + timeout)
+# 3. Resolve Download Link
+query = urllib.parse.urlencode({"path": api_path, "filename": filename, "user": user})
+dl_req = urllib.request.Request(
+    f"https://www.fmod.com/api-get-download-link?{query}",
+    headers={"Authorization": f"Bearer {token}", "User-Agent": "GodotFmodProvisioner/1.0"},
+    method="GET",
+)
+
 try:
-    dl_link = f"https://www.fmod.com/api-get-download-link?path={api_path}&filename={filename}&user={user}"
-    dl_resp = requests.get(dl_link, headers={"Authorization": f"Bearer {token}"}, timeout=30)
-    dl_resp.raise_for_status()
-    download_url = dl_resp.json().get("url")
+    with urllib.request.urlopen(dl_req, timeout=30) as resp:
+        download_url = json.loads(resp.read().decode("utf-8")).get("url")
 except Exception:
     print("Error: Failed to obtain authorized download URL.")
     sys.exit(1)
@@ -72,16 +84,18 @@ if not download_url:
     print("Error: Download URL missing in response.")
     sys.exit(1)
 
-# 4. Secure Download & Extraction in isolated temporary directory
+# 4. Download & Extraction in isolated temporary directory
 with tempfile.TemporaryDirectory(prefix="fmod_provision_") as temp_dir:
     download_target = os.path.join(temp_dir, filename)
     print(f">>> Downloading {platform} SDK package...")
     try:
-        with requests.get(download_url, stream=True, timeout=60) as stream:
-            stream.raise_for_status()
-            with open(download_target, "wb") as f:
-                for chunk in stream.iter_content(chunk_size=65536):
-                    f.write(chunk)
+        file_req = urllib.request.Request(download_url, headers={"User-Agent": "GodotFmodProvisioner/1.0"})
+        with urllib.request.urlopen(file_req, timeout=120) as stream, open(download_target, "wb") as f:
+            while True:
+                chunk = stream.read(65536)
+                if not chunk:
+                    break
+                f.write(chunk)
     except Exception as e:
         print(f"Error: Download interrupted: {e}")
         sys.exit(1)
@@ -103,7 +117,6 @@ with tempfile.TemporaryDirectory(prefix="fmod_provision_") as temp_dir:
 
     elif platform in ("linux", "android"):
         with tarfile.open(download_target, "r:gz") as tar:
-            # Safe extraction avoiding CVE-2007-4559 directory traversal
             def is_within_directory(directory: str, target: str) -> bool:
                 abs_directory = os.path.abspath(directory)
                 abs_target = os.path.abspath(target)
@@ -113,7 +126,7 @@ with tempfile.TemporaryDirectory(prefix="fmod_provision_") as temp_dir:
                 for member in tar_obj.getmembers():
                     member_path = os.path.join(path, member.name)
                     if not is_within_directory(path, member_path):
-                        raise RuntimeError(f"Attempted Path Traversal in Tar File: {member.name}")
+                        raise RuntimeError(f"Attempted Path Traversal: {member.name}")
                 tar_obj.extractall(path)
 
             safe_extract(tar, extract_dir)
