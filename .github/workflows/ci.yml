@@ -61,7 +61,7 @@ jobs:
         id: cache-fmod-sdk
         with:
           path: platforms/gdextension/thirdparty/fmod
-          key: fmod-sdk-${{ matrix.platform }}-2.03.07
+          key: fmod-sdk-${{ matrix.platform }}-${{ hashFiles('scripts/fetch_fmod_sdk.py') }}
 
       - name: Fetch FMOD Engine SDK
         if: steps.cache-fmod-sdk.outputs.cache-hit != 'true'

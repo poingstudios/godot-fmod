@@ -88,13 +88,25 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
 
-      - name: Set up CCache
-        uses: hendrikmuhs/ccache-action@v1.2
+      - name: SCons Cache
+        uses: actions/cache@v6
         with:
-          key: ${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}
-          max-size: '1G'
+          path: ${{ github.workspace }}/.scons-cache
+          key: ${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}-scons-${{ github.ref }}-${{ github.sha }}
+          restore-keys: |
+            ${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}-scons-${{ github.ref }}
+            ${{ matrix.platform }}-${{ matrix.arch }}-${{ matrix.target }}-scons-
+            ${{ matrix.platform }}-${{ matrix.arch }}-scons-
+
+      - name: Cache FMOD Engine SDK
+        uses: actions/cache@v6
+        id: cache-fmod-sdk
+        with:
+          path: platforms/gdextension/thirdparty/fmod
+          key: fmod-sdk-${{ matrix.platform }}-${{ hashFiles('scripts/fetch_fmod_sdk.py') }}
 
       - name: Fetch FMOD Engine SDK
+        if: steps.cache-fmod-sdk.outputs.cache-hit != 'true'
         env:
           FMOD_USER: ${{ secrets.FMOD_USER }}
           FMOD_PASSWORD: ${{ secrets.FMOD_PASSWORD }}
@@ -103,6 +115,9 @@ jobs:
         shell: bash
 
       - name: Compile GDExtension Binary
+        env:
+          SCONS_CACHE: ${{ github.workspace }}/.scons-cache
+          SCONS_CACHE_LIMIT: 4096
         run: |
           scons -C platforms/gdextension platform=${{ matrix.platform }} target=${{ matrix.target }} arch=${{ matrix.arch }}
         shell: bash
