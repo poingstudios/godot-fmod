@@ -12,7 +12,7 @@ config_version=5
 
 config/name="Godot FMOD"
 config/description="Direct FMOD Studio and FMOD Core GDExtension integration for Godot 4.x."
-run/main_scene="res://addons/fmod/gdscript/sample/DemoAudioGDScript.tscn"
+run/main_scene="uid://b5m6x1q2w3e4r"
 config/features=PackedStringArray("4.7", "C#", "Forward Plus")
 config/icon="res://icon.svg"
 

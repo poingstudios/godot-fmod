@@ -217,7 +217,9 @@ Ref<FmodEventDescription> FmodServer::get_event_description(const String &p_path
 
 	FMOD::Studio::EventDescription *desc = nullptr;
 	FMOD_RESULT res = singleton->studio_system->getEvent(p_path.utf8().get_data(), &desc);
-	FMOD_CHECK_ERR(res, String("Failed to get event description: ") + p_path);
+	if (res != FMOD_OK && res != FMOD_ERR_EVENT_NOTFOUND) {
+		FMOD_CHECK_ERR(res, String("Failed to get event description: ") + p_path);
+	}
 
 	if (desc != nullptr) {
 		Ref<FmodEventDescription> desc_ref;

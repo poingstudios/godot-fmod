@@ -6,7 +6,7 @@ AI assistant context for the godot-fmod repository. Read this before making chan
 
 ## Project Overview
 
-**Godot FMOD** is an official-grade, high-performance GDExtension plugin for Godot 4.x that provides a direct, idiomatic C++ wrapper around the **FMOD Studio** and **FMOD Core** APIs (targeting the FMOD 2.03.x series), accompanied by high-level Godot SceneTree nodes for rapid spatial audio workflows.
+**Godot FMOD** is an official-grade, high-performance GDExtension plugin for Godot 4.x that provides a direct, idiomatic C++ wrapper around the **FMOD Studio** and **FMOD Core** APIs (targeting the FMOD 2.03.x series), accompanied by high-level Godot SceneTree nodes for rapid spatial audio workflows and a full-featured in-editor Studio Workstation main screen tool.
 
 - **Engine:** Godot 4.x
 - **Primary Language:** C++17 (Pure GDExtension)
@@ -52,16 +52,20 @@ godot-fmod/
 │               │   └── .gdignore
 │               ├── icons/   # Custom node icons (SVG)
 │               ├── internal/# Internal GDScript implementation (no class_name, preload only)
-│               │   └── services/
-│               │       └── csharp_service.gd # Auto-hides csharp/ folder via .gdignore
+│               │   ├── services/
+│               │   │   ├── csharp_service.gd   # Auto-hides csharp/ folder via .gdignore
+│               │   │   └── settings_service.gd # ProjectSettings (fmod/*) registration & sync
+│               │   └── ui/
+│               │       ├── fmod_main_screen.gd # In-editor FMOD Studio Workstation logic
+│               │       └── fmod_main_screen.tscn
 │               ├── gdscript/ # GDScript samples & utilities
 │               │   └── sample/
-│               │       ├── DemoAudioGDScript.gd
-│               │       └── DemoAudioGDScript.tscn
+│               │       ├── DemoAudioGDScript.gd / .tscn     # 2D spatial audio demo
+│               │       └── DemoAudio3DGDScript.gd / .tscn   # 3D spatial audio demo
 │               ├── csharp/  # C# typed wrapper classes (namespace: PoingStudios.GodotFmod)
 │               │   ├── sample/
-│               │   │   ├── DemoAudioCSharp.cs
-│               │   │   └── DemoAudioCSharp.tscn
+│               │   │   ├── DemoAudioCSharp.cs / .tscn       # 2D spatial audio demo
+│               │   │   └── DemoAudio3DCSharp.cs / .tscn     # 3D spatial audio demo
 │               │   └── src/
 │               │       ├── FmodEnums.cs
 │               │       ├── FmodServer.cs
@@ -78,10 +82,10 @@ godot-fmod/
 │               │           └── FmodNodeExtensions.cs
 │               ├── fmod.gdextension # GDExtension manifest
 │               ├── plugin.cfg       # Addon metadata
-│               └── plugin.gd        # EditorPlugin entry point
+│               └── plugin.gd        # EditorPlugin entry point (Main Screen registration)
 └── scripts/
     ├── build_local.sh       # Automated local build script
-    └── setup_fmod_sdk.sh    # Helper script to download/link FMOD SDK headers and libs
+    └── fetch_fmod_sdk.py    # Zero-dependency authenticated FMOD SDK provisioner
 ```
 
 ---
@@ -90,7 +94,7 @@ godot-fmod/
 
 | Class | Type | Purpose |
 | :--- | :--- | :--- |
-| `FmodServer` | Engine Singleton | Studio system lifecycle, bank loading, one-shots (`play_one_shot`), global parameters, bus routing, listeners |
+| `FmodServer` | Engine Singleton | Studio system lifecycle, bank loading, one-shots (`play_one_shot`, `play_one_shot_3d`, `play_one_shot_2d`), global parameters, bus routing, listeners |
 | `FmodEventInstance` | `RefCounted` | 1:1 wrapper for `FMOD::Studio::EventInstance` (playback, 3D attributes, parameters, timeline, volume) |
 | `FmodEventDescription`| `RefCounted` | 1:1 wrapper for `FMOD::Studio::EventDescription` (metadata, length, 3D flags, instance factory) |
 | `FmodBank` | `RefCounted` | 1:1 wrapper for `FMOD::Studio::Bank` (bank lifecycle, sample loading states) |
@@ -103,14 +107,39 @@ godot-fmod/
 
 ---
 
+## Editor Tools & Project Settings
+
+### 🎵 FMOD Studio Workstation (`fmod_main_screen`)
+The addon integrates a dedicated **Main Screen Editor Tool** (`[ 2D ] [ 3D ] [ Script ] [ AssetLib ] [ 🎵 FMOD ]`):
+- **Audition Station**: Real-time event transport deck (Play/Pause/Stop), timeline scrubber, pitch/volume controls, and dynamic parameter faders. Automatically centers 3D audio listener for accurate auditioning.
+- **Mixing Console**: Submix buses (`bus:/...`) and VCAs (`vca:/...`) with real-time volume faders, mute/pause toggles, and panic stop.
+- **Global Parameters**: Live manipulation of global Studio parameters.
+- **Bank Manager**: Visual bank lifecycle cards with Load, Unload, and Preload Samples (`load_sample_data()`) actions.
+- **Auto-Discovery**: Automatically discovers `.bank` files from configured paths and scans project scripts/scenes for event paths.
+
+### ⚙️ Project Settings Integration (`SettingsService`)
+The plugin automatically exposes and manages configuration keys under `fmod/` in Godot's **Project Settings**:
+- `fmod/general/auto_initialize`: Auto-start FMOD at launch (`bool`).
+- `fmod/banks/banks_path`: Base bank directory (`String (DIR)`, default `"res://"`).
+- `fmod/banks/auto_load_banks`: Auto-load discovered banks (`bool`).
+- `fmod/banks/preload_sample_data`: Preload sample waveform audio into memory (`bool`).
+- `fmod/audio/real_channels`: Channel count allocation (`int`, default `64`).
+- `fmod/audio/sample_rate`: Mixer sample rate (`enum`, default `48000`).
+- `fmod/live_update/enable_in_editor`: Live Update socket in editor (`bool`).
+- `fmod/live_update/enable_in_debug`: Live Update socket in debug (`bool`).
+- `fmod/live_update/live_update_port`: Live Update TCP port (`int`, default `9264`).
+
+---
+
 ## Build & Test Commands
 
 ### Prerequisites
 
-- **Godot 4.x** (executable at `/Volumes/Mac500GB/Downloads/Godot462.app`)
+- **Godot 4.x** (mono/standard editor executable)
 - **C++17 Compiler** (Clang on macOS, GCC/Clang on Linux, MSVC on Windows)
 - **SCons** (`pip install scons`)
 - **Python 3.x**
+- **.NET SDK** (for C# sample compilation: `dotnet build`)
 - **FMOD Engine SDK 2.03.x**
 
 ### Compile GDExtension
@@ -133,10 +162,16 @@ scons -C platforms/gdextension platform=linux target=template_debug arch=x86_64
 scons -C platforms/gdextension platform=windows target=template_debug arch=x86_64
 ```
 
-### Running the Godot Editor Testbed
+### Compile C# Solutions
 
 ```bash
-/Volumes/Mac500GB/Downloads/Godot462.app/Contents/MacOS/Godot --path platforms/godot_editor -e
+dotnet build "platforms/godot_editor/Godot FMOD.csproj"
+```
+
+### Running Lint Verification
+
+```bash
+gdlint platforms/godot_editor/addons/
 ```
 
 ---
@@ -147,7 +182,7 @@ scons -C platforms/gdextension platform=windows target=template_debug arch=x86_6
 
 1. **Memory & Lifecycle**: Wrap raw FMOD C++ pointers safely. Release event instances and banks explicitly or via `RefCounted` destructors.
 2. **Coordinate Space**: Always convert coordinates using `fmod_types.h` (Godot Y-Up / right-handed <-> FMOD).
-3. **Error Handling**: Use `FMOD_CHECK_ERR(result, "Context message")` for every FMOD C++ API call.
+3. **Error Handling**: Use `FMOD_CHECK_ERR(result, "Context message")` for FMOD C++ API calls. Suppress non-fatal inquiries like `FMOD_ERR_EVENT_NOTFOUND`.
 4. **Registration**: Register all classes, methods, properties, and enums cleanly in `register_types.cpp` through `godot::ClassDB`.
 
 ### C# Rules & 1:1 API Parity
@@ -165,7 +200,7 @@ scons -C platforms/gdextension platform=windows target=template_debug arch=x86_6
 
 ### General & Licensing Rules
 
-1. **License Headers**: Every source file (`.cpp`, `.h`, `.cs`, `.gd`, `SConstruct`, `.sh`) must begin with the standard Poing Studios MIT License header block.
+1. **License Headers**: Every source file (`.cpp`, `.h`, `.cs`, `.gd`, `SConstruct`, `.sh`, `.py`) must begin with the standard Poing Studios MIT License header block.
 2. **Proprietary Asset Isolation**: Never commit proprietary FMOD SDK binaries (`.dylib`, `.so`, `.dll`), headers, or `.bank` audio files into Git. Keep them in `.gitignore`.
 3. **Submodule Tracking**: Always specify explicit branches in `.gitmodules` (e.g. `branch = master`).
 
@@ -174,4 +209,3 @@ scons -C platforms/gdextension platform=windows target=template_debug arch=x86_6
 - Always use the `gh` CLI for GitHub interactions.
 - Never commit directly unless explicitly instructed.
 - All code changes and responses must be in English.
-

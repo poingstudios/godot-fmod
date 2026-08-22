@@ -143,6 +143,7 @@ func _process(_delta: float) -> void:
 func _init_fmod_system() -> void:
 	if ClassDB.class_exists("FmodServer"):
 		FmodServer.initialize()
+		FmodServer.set_listener_attributes_3d(0, Transform3D.IDENTITY)
 		status_badge.text = "● FMOD READY"
 		status_badge.modulate = Color(0.3, 0.9, 0.4)
 	else:
@@ -238,16 +239,33 @@ func _discover_project_audio_elements() -> void:
 			var content := f.get_as_text()
 			var matches := regex.search_all(content)
 			for m in matches:
-				var path_found := m.get_string()
+				var path_found := m.get_string().strip_edges()
+				# Ignore placeholder names
+				if "pathto" in path_found.to_lower().replace("/", "").replace("_", ""):
+					continue
+
 				if path_found.begins_with("event:/") and not _user_events.has(path_found):
-					_user_events.append(path_found)
-					has_new = true
+					var desc := FmodServer.get_event_description(path_found)
+					if desc and desc.is_valid():
+						_user_events.append(path_found)
+						has_new = true
 				elif path_found.begins_with("bus:/") and not _user_buses.has(path_found):
 					_user_buses.append(path_found)
 					has_new = true
 				elif path_found.begins_with("vca:/") and not _user_vcas.has(path_found):
 					_user_vcas.append(path_found)
 					has_new = true
+
+	# Clean up any leftover invalid/placeholder events from user_events
+	var valid_events: Array[String] = []
+	for ep in _user_events:
+		if not "pathto" in ep.to_lower().replace("/", "").replace("_", ""):
+			var desc := FmodServer.get_event_description(ep)
+			if desc and desc.is_valid():
+				valid_events.append(ep)
+	if valid_events.size() != _user_events.size():
+		_user_events = valid_events
+		has_new = true
 
 	if has_new:
 		_save_persistent_settings()
@@ -660,8 +678,12 @@ func _on_play_pressed() -> void:
 		_active_instance.release()
 		_active_instance = null
 
+	# Set listener at center with identity transform
+	FmodServer.set_listener_attributes_3d(0, Transform3D.IDENTITY)
+
 	_active_instance = FmodServer.create_event_instance(_selected_event_path)
 	if _active_instance and _active_instance.is_valid():
+		_active_instance.set_3d_attributes(Transform3D.IDENTITY)
 		_active_instance.set_pitch(pitch_slider.value)
 		_active_instance.set_volume(vol_slider.value)
 

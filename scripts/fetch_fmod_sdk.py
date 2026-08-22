@@ -147,19 +147,10 @@ with tempfile.TemporaryDirectory(prefix="fmod_provision_") as temp_dir:
 
     elif platform in ("linux", "android"):
         with tarfile.open(download_target, "r:gz") as tar:
-            def is_within_directory(directory: str, target: str) -> bool:
-                abs_directory = os.path.abspath(directory)
-                abs_target = os.path.abspath(target)
-                return os.path.commonprefix([abs_directory, abs_target]) == abs_directory
-
-            def safe_extract(tar_obj: tarfile.TarFile, path: str = "."):
-                for member in tar_obj.getmembers():
-                    member_path = os.path.join(path, member.name)
-                    if not is_within_directory(path, member_path):
-                        raise RuntimeError(f"Attempted Path Traversal: {member.name}")
-                    tar_obj.extractall(path)
-
-            safe_extract(tar, extract_dir)
+            if hasattr(tarfile, "data_filter"):
+                tar.extractall(extract_dir, filter="data")
+            else:
+                tar.extractall(extract_dir)
 
         for path in glob.glob(f"{extract_dir}/**/api", recursive=True):
             shutil.copytree(path, f"{sdk_dest}/api", dirs_exist_ok=True)
